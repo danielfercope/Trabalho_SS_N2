@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geração de Gráficos</title>
+</head>
+<body>
+    <h1>Geração de Gráficos</h1>
+    <label for="numbers">Digite a lista de números (separados por vírgula):</label>
+    <input type="text" id="numbers" name="numbers">
+    <br>
+    <label for="chartType">Selecione o tipo de gráfico:</label>
+    <select id="chartType" name="chartType">
+        <option value="scatter">Scatter Plots</option>
+        <option value="line">Line Charts</option>
+        <option value="bar">Bar Charts</option>
+        <option value="bubble">Bubble Charts</option>
+        <option value="dot">Dot Plots</option>
+    </select>
+    <br>
+    <button onclick="gerarGrafico()">Gerar Gráfico</button>
+    <br>
+    <div id="grafico"></div>
+
+    <script>
+        function gerarGrafico() {
+            const numbers = document.getElementById('numbers').value;
+            const chartType = document.getElementById('chartType').value;
+            const data = { numbers, chartType };
+
+            fetch('http://127.0.0.1:5000/gerar-grafico', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro ao gerar o gráfico');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const img = document.createElement('img');
+                img.src = url;
+                document.getElementById('grafico').innerHTML = '';
+
+                // Adiciona o link de download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'grafico.png';
+                link.innerText = 'Download do gráfico';
+                document.getElementById('grafico').appendChild(link);
+            })
+            .catch(error => {
+                console.error('Erro ao gerar o gráfico:', error);
+            });
+        }
+    </script>
+</body>
+</html>
